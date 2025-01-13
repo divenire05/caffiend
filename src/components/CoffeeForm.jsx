@@ -25,27 +25,36 @@ export default function CoffeeForm(props) {
 
         if (!selectedCoffee) {return}
 
-        const newGlobalData = {
-            ...(globalData || {})
+        try {
+            const newGlobalData = {
+                ...(globalData || {})
+            }
+    
+            const nowTime = Date.now()
+            const timeToSubtract = (hour * 60 * 60 * 1000) + (min * 60 * 100)
+            const timeStamp = nowTime - timeToSubtract
+            
+            const newData = {
+                name: selectedCoffee,
+                cost: coffeeCost
+            }
+            newGlobalData[timeStamp] = newData
+            console.log(timeStamp, selectedCoffee, coffeeCost)
+    
+            setGlobalData(newGlobalData)
+    
+            const userRef = doc(db, 'users', globalUser.uid)
+            const res = await setDoc(userRef, {
+                [timeStamp]: newData
+            }, {merge: true})
+
+            setSelectedCoffee(null)
+            setHour(0)
+            setMin(0)
+            setCoffeeCost(0)
+        } catch (err) {
+            console.log(err.message())
         }
-
-        const nowTime = Date.now()
-        const timeToSubtract = (hour * 60 * 60 * 1000) + (min * 60 * 100)
-        const timeStamp = nowTime - timeToSubtract
-        
-        const newData = {
-            name: selectedCoffee,
-            cost: coffeeCost
-        }
-        newGlobalData[timeStamp] = newData
-        console.log(timeStamp, selectedCoffee, coffeeCost)
-
-        setGlobalData(newGlobalData)
-
-        const userRef = doc(db, 'users', globalUser.uid)
-        const res = await setDoc(userRef, {
-            [timeStamp]: newData
-        }, {merge: true})
     }
 
     function handleCloseModal() {
