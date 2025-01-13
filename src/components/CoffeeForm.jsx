@@ -2,6 +2,9 @@ import { coffeeOptions } from "../utils";
 import {useState} from 'react'
 import Modal from "./Modal";
 import Authentication from "./Authentication";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../../firebase";
+import { setDoc } from "firebase/firestore";
 
 export default function CoffeeForm(props) {
     const {isAuthenticated} = props
@@ -12,12 +15,37 @@ export default function CoffeeForm(props) {
     const [hour, setHour] = useState(0)
     const [min, setMin] = useState(0)
 
-    function handleSubmitForm() {
+    const {globalData, setGlobalData, globalUser} = useAuth()
+
+    async function handleSubmitForm() {
         if (!isAuthenticated) {
             setShowModal(true)
             return
         }
-        console.log(selectedCoffee, coffeeCost, hour, min)
+
+        if (!selectedCoffee) {return}
+
+        const newGlobalData = {
+            ...(globalData || {})
+        }
+
+        const nowTime = Date.now()
+        const timeToSubtract = (hour * 60 * 60 * 1000) + (min * 60 * 100)
+        const timeStamp = nowTime - timeToSubtract
+        
+        const newData = {
+            name: selectedCoffee,
+            cost: coffeeCost
+        }
+        newGlobalData[timeStamp] = newData
+        console.log(timestamp, selectedCoffee, coffeeCost)
+
+        setGlobalData(newGlobalData)
+
+        const userRef = doc(db, 'users', globalUser.uid)
+        const res = await setDoc(userRef, {
+            [timeStamp]: newData
+        }, {merge: true})
     }
 
     function handleCloseModal() {
