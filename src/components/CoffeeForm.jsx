@@ -4,7 +4,7 @@ import Modal from "./Modal";
 import Authentication from "./Authentication";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../../firebase";
-import { setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function CoffeeForm(props) {
     const {isAuthenticated} = props
@@ -38,7 +38,7 @@ export default function CoffeeForm(props) {
             cost: coffeeCost
         }
         newGlobalData[timeStamp] = newData
-        console.log(timestamp, selectedCoffee, coffeeCost)
+        console.log(timeStamp, selectedCoffee, coffeeCost)
 
         setGlobalData(newGlobalData)
 
